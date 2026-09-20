@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
@@ -7,11 +7,13 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import Link from '@mui/material/Link';
 import Divider from '@mui/material/Divider';
+import Snackbar from '@mui/material/Snackbar';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import GoogleIcon from '@mui/icons-material/Google';
 import AppleIcon from '@mui/icons-material/Apple';
 import { FaFacebook } from 'react-icons/fa';
+import { validateUsername, validatePassword } from '../utils/validation';
 
 const socialButtonSx = {
   bgcolor: '#000',
@@ -25,10 +27,38 @@ export default function LoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({ username: '', password: '' });
+  const [success, setSuccess] = useState(false);
+
+  const handleUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setUsername(value);
+    // once an error is showing, update it live while the user fixes it
+    if (errors.username) {
+      setErrors((prev) => ({ ...prev, username: validateUsername(value) }));
+    }
+  };
+
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+    if (errors.password) {
+      setErrors((prev) => ({ ...prev, password: validatePassword(value) }));
+    }
+  };
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    // validation will be added in the next stage
+
+    const usernameError = validateUsername(username);
+    const passwordError = validatePassword(password);
+    setErrors({ username: usernameError, password: passwordError });
+
+    if (usernameError || passwordError) return;
+
+    // The assignment doesn't need a real backend login,
+    // so a valid form just shows a confirmation message.
+    setSuccess(true);
   };
 
   return (
@@ -56,18 +86,40 @@ export default function LoginForm() {
         <TextField
           fullWidth
           placeholder="Username"
+          autoComplete="username"
           value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={handleUsernameChange}
+          onBlur={() => {
+            if (username) {
+              setErrors((prev) => ({ ...prev, username: validateUsername(username) }));
+            }
+          }}
+          error={Boolean(errors.username)}
+          helperText={errors.username}
+          slotProps={{
+            htmlInput: { 'aria-label': 'Username' },
+            formHelperText: { sx: { ml: 3 } },
+          }}
           sx={{ mb: 1.5 }}
         />
 
         <TextField
           fullWidth
           placeholder="Password"
+          autoComplete="current-password"
           type={showPassword ? 'text' : 'password'}
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={handlePasswordChange}
+          onBlur={() => {
+            if (password) {
+              setErrors((prev) => ({ ...prev, password: validatePassword(password) }));
+            }
+          }}
+          error={Boolean(errors.password)}
+          helperText={errors.password}
           slotProps={{
+            htmlInput: { 'aria-label': 'Password' },
+            formHelperText: { sx: { ml: 3 } },
             input: {
               endAdornment: (
                 <InputAdornment position="end">
@@ -121,6 +173,14 @@ export default function LoginForm() {
           <FaFacebook size={24} />
         </IconButton>
       </Box>
+
+      <Snackbar
+        open={success}
+        autoHideDuration={3500}
+        onClose={() => setSuccess(false)}
+        message="Details look good! (No backend login in this demo)"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
     </Box>
   );
 }
