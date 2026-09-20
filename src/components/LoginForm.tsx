@@ -8,12 +8,16 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Link from '@mui/material/Link';
 import Divider from '@mui/material/Divider';
 import Snackbar from '@mui/material/Snackbar';
+import CircularProgress from '@mui/material/CircularProgress';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import GoogleIcon from '@mui/icons-material/Google';
 import AppleIcon from '@mui/icons-material/Apple';
 import { FaFacebook } from 'react-icons/fa';
+import { FirebaseError } from 'firebase/app';
 import { validateUsername, validatePassword } from '../utils/validation';
+import { useNavigate } from 'react-router-dom';
+import { signInWithGoogle, TOKEN_STORAGE_KEY } from '../firebase/auth';
 
 const socialButtonSx = {
   bgcolor: '#000',
@@ -24,11 +28,14 @@ const socialButtonSx = {
 };
 
 export default function LoginForm() {
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({ username: '', password: '' });
   const [success, setSuccess] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState('');
 
   const handleUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -59,6 +66,21 @@ export default function LoginForm() {
     // The assignment doesn't need a real backend login,
     // so a valid form just shows a confirmation message.
     setSuccess(true);
+  };
+
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    try {
+      const { accessToken } = await signInWithGoogle();
+      sessionStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
+      navigate('/token');
+    } catch (error) {
+      // closing the popup is not an error worth showing
+      if (error instanceof FirebaseError && error.code === 'auth/popup-closed-by-user') return;
+      setGoogleError('Google sign-in failed. Please try again.');
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   return (
@@ -163,8 +185,13 @@ export default function LoginForm() {
       <Divider sx={{ my: 4.5, fontSize: 14, color: 'text.primary' }}>or continue with</Divider>
 
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3 }}>
-        <IconButton aria-label="Continue with Google" sx={socialButtonSx}>
-          <GoogleIcon />
+        <IconButton
+          aria-label="Continue with Google"
+          onClick={handleGoogleLogin}
+          disabled={googleLoading}
+          sx={socialButtonSx}
+        >
+          {googleLoading ? <CircularProgress size={22} sx={{ color: '#fff' }} /> : <GoogleIcon />}
         </IconButton>
         <IconButton aria-label="Continue with Apple" sx={socialButtonSx}>
           <AppleIcon />
@@ -173,6 +200,14 @@ export default function LoginForm() {
           <FaFacebook size={24} />
         </IconButton>
       </Box>
+
+      <Snackbar
+        open={Boolean(googleError)}
+        autoHideDuration={4000}
+        onClose={() => setGoogleError('')}
+        message={googleError}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
 
       <Snackbar
         open={success}

@@ -10,7 +10,7 @@ export default function LoginPage() {
       {/* Left side: form in the middle, register link pinned to the bottom */}
       <Box
         sx={{
-          flex: 1,
+          flex:1,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
