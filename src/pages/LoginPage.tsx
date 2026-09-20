@@ -2,6 +2,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import LoginForm from '../components/LoginForm';
+import IllustrationPanel from '../components/IllustrationPanel';
 
 export default function LoginPage() {
   return (
@@ -36,19 +37,8 @@ export default function LoginPage() {
         </Typography>
       </Box>
 
-      {/* Right side: illustration panel, hidden on mobile */}
-      <Box
-        sx={{
-          flex: 1,
-          display: { xs: 'none', md: 'flex' },
-          alignItems:'center',
-          justifyContent: 'center',
-          bgcolor: '#F4F8EE',
-          borderRadius:3,
-        }}
-      >
-        <Typography color="text.secondary">Illustration goes here</Typography>
-      </Box>
+      {/* Right side: illustration panel (hidden on mobile) */}
+      <IllustrationPanel />
     </Box>
   );
 }
