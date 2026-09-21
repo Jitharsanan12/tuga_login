@@ -33,7 +33,7 @@ const SLIDES: Slide[] = [
   },
 ];
 
-// The company design shows the third slide, so the page opens on it.
+
 const DESIGN_SLIDE = 2;
 
 const avatarSize = { md: 56, lg: 72 };
@@ -54,10 +54,10 @@ const blink = keyframes`
   96% { transform: scaleY(0.1); }
 `;
 
-// How far (px) a hidden slide waits to the left or right of the visible one.
+// how far a hidden slide waits to the left or right of the visible one.
 const SLIDE_OFFSET = 18;
 
-// Every slide stays mounted. The active one is visible; the others fade out and
+// every slide stays mounted. The active one is visible; the others fade out and
 // wait on the left (earlier slides) or on the right (later slides).
 function layerStyle(index: number, active: number, reduceMotion: boolean) {
   const isActive = index === active;
@@ -132,10 +132,10 @@ function GirlAvatar({ mood }: { mood: GirlMood }) {
 type AvatarBadgeProps = {
   children: React.ReactNode;
   place: object; // where it sits on the picture
-  floatOffset: number; // seconds: makes the two avatars bob out of sync
+  floatOffset: number; //seconds: makes the two avatars bob out of sync
   hopDelay: number; // seconds: the second avatar reacts a moment later
   blinkSeconds: number; // how often the eyes blink
-  reactions: number; // goes up every time the slide changes
+  reactions: number; //goes up every time the slide changes
   animate: boolean;
 };
 

@@ -63,7 +63,6 @@ export default function LoginForm() {
 
     if (usernameError || passwordError) return;
 
-    // The assignment doesn't need a real backend login,
     // so a valid form just shows a confirmation message.
     setSuccess(true);
   };
